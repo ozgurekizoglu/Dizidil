@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dizidil - Learn Turkish</title>
+    <link rel="stylesheet" href="styles.css?v=13">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Screens will be injected here by js/app.js -->
+        <main id="screen-container"></main>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav">
+            <button class="nav-btn" data-target="profile">
+                <i data-lucide="user"></i>
+                <span>Profile</span>
+            </button>
+            <button class="nav-btn active" data-target="home">
+                <i data-lucide="home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-btn" data-target="idioms">
+                <i data-lucide="book-open"></i>
+                <span>Idioms</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Application Logic as ES Module -->
+    <script type="module" src="js/app.js?v=13"></script>
+</body>
+</html>
