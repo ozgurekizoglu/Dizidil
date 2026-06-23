@@ -4,7 +4,7 @@
  * 3 soru tipi: kelime eşleştirme, boşluk doldurma, gramer sorusu
  */
 
-import { state, mockReels } from './state.js?v=14';
+import { state, mockReels } from './state.js?v=15';
 
 // ── Soru üretici ──────────────────────────────────────────────────────────────
 

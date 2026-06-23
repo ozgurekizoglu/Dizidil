@@ -1,5 +1,6 @@
-import { mockReels, state } from '../state.js?v=14';
+import { mockReels, state } from '../state.js?v=15';
 import { showQuiz } from '../quiz.js';
+import { showWordOrder } from '../word-order.js';
 
 export const reelsTemplate = `
     <div class="reels-screen">
@@ -358,22 +359,21 @@ function bindReelEvents(reelEl, reel) {
     if (quizBtn) {
         quizBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Videoyu duraklat
             const p = players[reelId];
             if (p && typeof p.pauseVideo === 'function') p.pauseVideo();
 
-            // Quiz overlay'i reel-item içine ekle
-            showQuiz(reel, reelEl, () => {
-                // Quiz bitti: butonu tamamlandı olarak güncelle
-                quizBtn.outerHTML = `
-                    <div class="quiz-done-badge">
-                        <i data-lucide="check-circle-2"></i>
-                        <span>Quiz Tamamlandı</span>
-                    </div>
-                `;
-                if (window.lucide) window.lucide.createIcons();
-                // Videoyu devam ettir
-                if (p && typeof p.playVideo === 'function') p.playVideo();
+            // Önce Cümle Sıralama Oyunu, sonra Quiz
+            showWordOrder(reel, reelEl, () => {
+                showQuiz(reel, reelEl, () => {
+                    quizBtn.outerHTML = `
+                        <div class="quiz-done-badge">
+                            <i data-lucide="check-circle-2"></i>
+                            <span>Tamamlandı!</span>
+                        </div>
+                    `;
+                    if (window.lucide) window.lucide.createIcons();
+                    if (p && typeof p.playVideo === 'function') p.playVideo();
+                });
             });
         });
     }

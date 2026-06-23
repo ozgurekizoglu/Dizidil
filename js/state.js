@@ -7,13 +7,29 @@ export const state = {
     listeners: [],
 
     // ── Kelime Defteri (Flashcard) ───────────────────────────────────────────
-    // wordBank: Map<word_string, { word, trMeaning, meaning, reelId, series,
-    //   addedAt, nextReview, interval, easeFactor, correct, wrong }>
     wordBank: new Map(),
 
     // ── Quiz ilerleme kaydı ──────────────────────────────────────────────────
-    // quizCompleted: Set<reelId> — quiz tamamlanan reeller
     quizCompleted: new Set(),
+
+    // ── Streak & Günlük Görevler ─────────────────────────────────────────────
+    streak: 0,
+    lastActivityDate: null,  // 'YYYY-MM-DD'
+    weeklyActivity: [],      // Son 7 günün aktif/pasif durumu [{date, active}]
+
+    // Bugünün istatistikleri (her gece sıfırlanır)
+    dailyStats: {
+        reelsWatched: 0,
+        quizCompleted: 0,
+        wordsSorted: 0,
+    },
+
+    // Tüm zamanlar
+    totalStats: {
+        reelsWatched: 0,
+        quizCompleted: 0,
+        wordsSorted: 0,
+    },
 
     // Simple state subscription
     subscribe(listener) {
@@ -118,7 +134,88 @@ export const state = {
     markQuizCompleted(reelId) {
         this.quizCompleted.add(reelId);
         this.addNazar(5); // quiz ödülü
+        this.recordActivity('quiz');
         this.notify();
+    },
+
+    // ── Streak & Aktivite metodları ──────────────────────────────────────────
+    getToday() {
+        return new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+    },
+
+    checkStreak() {
+        const today = this.getToday();
+        if (this.lastActivityDate === today) return; // zaten bugün sayıldı
+
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+        if (this.lastActivityDate === yesterdayStr) {
+            this.streak += 1; // Dün de aktifti, seri devam
+        } else if (this.lastActivityDate !== null && this.lastActivityDate !== today) {
+            this.streak = 1; // Gün atlandı, sıfırla
+        } else if (this.streak === 0) {
+            this.streak = 1;
+        }
+
+        this.lastActivityDate = today;
+
+        // Streak ödülleri
+        if (this.streak === 7) this.addNazar(20);
+        else if (this.streak === 30) this.addNazar(100);
+
+        // Haftalık aktiviteyi güncelle
+        this.updateWeeklyActivity(today, true);
+        this.notify();
+    },
+
+    updateWeeklyActivity(dateStr, active) {
+        // Son 7 günlük listeyi tut
+        const existing = this.weeklyActivity.find(d => d.date === dateStr);
+        if (existing) {
+            existing.active = existing.active || active;
+        } else {
+            this.weeklyActivity.push({ date: dateStr, active });
+        }
+        // Sadece son 7 günü sakla
+        this.weeklyActivity = this.weeklyActivity
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .slice(-7);
+    },
+
+    recordActivity(type) {
+        // type: 'reel' | 'quiz' | 'word_sort'
+        const today = this.getToday();
+
+        // Gün değişmişse günlük istatistikleri sıfırla
+        if (this.lastActivityDate !== today && this.lastActivityDate !== null) {
+            this.dailyStats = { reelsWatched: 0, quizCompleted: 0, wordsSorted: 0 };
+        }
+
+        if (type === 'reel') {
+            this.dailyStats.reelsWatched++;
+            this.totalStats.reelsWatched++;
+        } else if (type === 'quiz') {
+            this.dailyStats.quizCompleted++;
+            this.totalStats.quizCompleted++;
+        } else if (type === 'word_sort') {
+            this.dailyStats.wordsSorted++;
+            this.totalStats.wordsSorted++;
+            this.addNazar(3);
+        }
+
+        this.checkStreak();
+    },
+
+    // Günlük görev ilerleme yüzdesi (0-100)
+    getDailyProgress() {
+        const goals = { reels: 3, quiz: 1, wordSort: 2 };
+        const reelPct  = Math.min(1, this.dailyStats.reelsWatched / goals.reels);
+        const quizPct  = Math.min(1, this.dailyStats.quizCompleted / goals.quiz);
+        const sortPct  = Math.min(1, this.dailyStats.wordsSorted / goals.wordSort);
+        return { reelPct, quizPct, sortPct,
+            overall: Math.round((reelPct + quizPct + sortPct) / 3 * 100) };
     },
 
     unlockSeries(seriesId, cost) {
@@ -137,15 +234,25 @@ export const state = {
             localStorage.setItem('dizidil_nazar', this.nazarCount);
             localStorage.setItem('dizidil_saved', JSON.stringify([...this.savedReels]));
             localStorage.setItem('dizidil_unlocked', JSON.stringify([...this.unlockedSeries]));
-            // wordBank: Map → Array of entries
             localStorage.setItem('dizidil_wordbank', JSON.stringify([...this.wordBank.entries()]));
             localStorage.setItem('dizidil_quiz', JSON.stringify([...this.quizCompleted]));
+            // Streak & stats
+            localStorage.setItem('dizidil_streak', this.streak);
+            localStorage.setItem('dizidil_last_activity', this.lastActivityDate || '');
+            localStorage.setItem('dizidil_weekly', JSON.stringify(this.weeklyActivity));
+            localStorage.setItem('dizidil_daily_stats', JSON.stringify(this.dailyStats));
+            localStorage.setItem('dizidil_total_stats', JSON.stringify(this.totalStats));
         } else {
             localStorage.removeItem('dizidil_nazar');
             localStorage.removeItem('dizidil_saved');
             localStorage.removeItem('dizidil_unlocked');
             localStorage.removeItem('dizidil_wordbank');
             localStorage.removeItem('dizidil_quiz');
+            localStorage.removeItem('dizidil_streak');
+            localStorage.removeItem('dizidil_last_activity');
+            localStorage.removeItem('dizidil_weekly');
+            localStorage.removeItem('dizidil_daily_stats');
+            localStorage.removeItem('dizidil_total_stats');
         }
     },
 
@@ -172,6 +279,31 @@ export const state = {
 
             const quizStr = localStorage.getItem('dizidil_quiz');
             if (quizStr) this.quizCompleted = new Set(JSON.parse(quizStr));
+
+            // Streak & stats
+            const streakStr = localStorage.getItem('dizidil_streak');
+            if (streakStr) this.streak = parseInt(streakStr, 10);
+
+            const lastActivity = localStorage.getItem('dizidil_last_activity');
+            if (lastActivity) this.lastActivityDate = lastActivity;
+
+            const weeklyStr = localStorage.getItem('dizidil_weekly');
+            if (weeklyStr) this.weeklyActivity = JSON.parse(weeklyStr);
+
+            const dailyStr = localStorage.getItem('dizidil_daily_stats');
+            if (dailyStr) {
+                const loaded = JSON.parse(dailyStr);
+                // Eğer son aktivite bugün değilse sıfırla
+                const today = this.getToday();
+                if (this.lastActivityDate !== today) {
+                    this.dailyStats = { reelsWatched: 0, quizCompleted: 0, wordsSorted: 0 };
+                } else {
+                    this.dailyStats = loaded;
+                }
+            }
+
+            const totalStr = localStorage.getItem('dizidil_total_stats');
+            if (totalStr) this.totalStats = JSON.parse(totalStr);
         }
     }
 };

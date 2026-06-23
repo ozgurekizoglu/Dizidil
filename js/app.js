@@ -1,8 +1,9 @@
-import { setupHome } from './pages/home.js?v=14';
-import { setupReels, cleanupPlayers } from './pages/reels.js?v=14';
-import { setupProfile } from './pages/profile.js?v=14';
-import { setupIdioms } from './pages/idioms.js?v=14';
-import { state } from './state.js?v=14';
+import { setupHome } from './pages/home.js?v=15';
+import { setupReels, cleanupPlayers } from './pages/reels.js?v=15';
+import { setupProfile } from './pages/profile.js?v=15';
+import { setupIdioms } from './pages/idioms.js?v=15';
+import { setupProgress } from './pages/progress.js?v=15';
+import { state } from './state.js?v=15';
 
 const screenContainer = document.getElementById('screen-container');
 const bottomNav = document.getElementById('bottom-nav');
@@ -66,6 +67,8 @@ function navigateTo(screenId, data = null) {
             setupProfile(screenContainer, navigateTo);
         } else if (screenId === 'idioms') {
             setupIdioms(screenContainer);
+        } else if (screenId === 'progress') {
+            setupProgress(screenContainer);
         }
     } catch (error) {
         console.error("Navigation error:", error);

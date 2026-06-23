@@ -1,4 +1,4 @@
-import { state, mockReels } from '../state.js?v=14';
+import { state, mockReels } from '../state.js?v=15';
 import { setupFlashcards } from '../flashcard.js';
 
 export const profileTemplate = `
