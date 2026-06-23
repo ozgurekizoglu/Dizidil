@@ -3,7 +3,7 @@
  * SM-2 tabanlı aralıklı tekrar, dönen kart animasyonu
  */
 
-import { state } from './state.js?v=14';
+import { state } from './state.js?v=15';
 
 // ── Ana flashcard ekranı ──────────────────────────────────────────────────────
 

@@ -1,9 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dizidil - Learn Turkish</title>
+    <script>
+        window.addEventListener('error', function(e) {
+            document.body.innerHTML += '<div style="position:fixed; top:0; left:0; right:0; background:red; color:white; z-index:9999; padding:20px; font-size:14px; word-wrap:break-word;">' + 
+                '<strong>JS Error:</strong> ' + e.message + '<br>' + e.filename + ':' + e.lineno + 
+                '<br><pre>' + (e.error && e.error.stack ? e.error.stack : '') + '</pre>' +
+                '</div>';
+        });
+        window.addEventListener('unhandledrejection', function(e) {
+            document.body.innerHTML += '<div style="position:fixed; top:0; left:0; right:0; background:orange; color:white; z-index:9999; padding:20px; font-size:14px; word-wrap:break-word;">' + 
+                '<strong>Unhandled Promise Rejection:</strong> ' + e.reason +
+                '</div>';
+        });
+    </script>
     <link rel="stylesheet" href="styles.css?v=15">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
