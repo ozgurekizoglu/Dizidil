@@ -1,4 +1,5 @@
-import { mockReels, state } from '../state.js?v=9';
+import { mockReels, state } from '../state.js?v=14';
+import { showQuiz } from '../quiz.js';
 
 export const reelsTemplate = `
     <div class="reels-screen">
@@ -68,8 +69,19 @@ export function setupReels(container, navigateTo, data) {
         });
         const vocabChips = allVocab.map(v => `
             <div class="vocab-chip">
-                <span class="vocab-chip-word">${v.word}</span>
-                <span class="vocab-chip-meaning">${v.meaning}</span>
+                <div class="vocab-chip-text">
+                    <span class="vocab-chip-word">${v.word}</span>
+                    <span class="vocab-chip-meaning">${v.meaning}</span>
+                </div>
+                <button class="vocab-add-btn ${state.wordBank.has(v.word.toLowerCase()) ? 'added' : ''}"
+                        data-word="${v.word}"
+                        data-tr="${escapeAttr(v.trMeaning || '')}"
+                        data-meaning="${escapeAttr(v.meaning)}"
+                        data-series="${escapeAttr(reel.series)}"
+                        data-reel-id="${reel.id}"
+                        title="${state.wordBank.has(v.word.toLowerCase()) ? 'Zaten eklendi' : 'Kelime defterime ekle'}">
+                    <i data-lucide="${state.wordBank.has(v.word.toLowerCase()) ? 'check' : 'plus'}"></i>
+                </button>
             </div>
         `).join('');
 
@@ -152,6 +164,20 @@ export function setupReels(container, navigateTo, data) {
                     <span>Son klip — tebrikler!</span>
                 </div>
                 `}
+
+                <!-- Quiz butonu -->
+                ${!state.quizCompleted.has(reel.id) ? `
+                <button class="quiz-trigger-btn" id="quiz-btn-${reel.id}">
+                    <i data-lucide="brain"></i>
+                    <span>Quiz'e Başla</span>
+                    <span class="quiz-reward-badge">+5 🧿</span>
+                </button>
+                ` : `
+                <div class="quiz-done-badge">
+                    <i data-lucide="check-circle-2"></i>
+                    <span>Quiz Tamamlandı</span>
+                </div>
+                `}
             </div>
 
             <!-- 3. Öğren paneli (üstten kayarak açılır) -->
@@ -210,6 +236,11 @@ function formatTime(seconds) {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
     return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// ─── Yardımcı: HTML attribute escape ─────────────────────────────────────────
+function escapeAttr(str) {
+    return String(str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // ─── Event Binding ───────────────────────────────────────────────────────────
@@ -295,6 +326,70 @@ function bindReelEvents(reelEl, reel) {
             card.classList.add('active');
         });
     });
+
+    // ── Vocab "+" butonları → kelime defterine ekle ──────────────────────────
+    reelEl.querySelectorAll('.vocab-add-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (btn.classList.contains('added')) return;
+
+            const added = state.addWord({
+                word:      btn.dataset.word,
+                trMeaning: btn.dataset.tr,
+                meaning:   btn.dataset.meaning,
+                reelId:    btn.dataset.reelId,
+                series:    btn.dataset.series
+            });
+
+            if (added) {
+                btn.classList.add('added');
+                btn.innerHTML = '<i data-lucide="check"></i>';
+                btn.title = 'Kelime defterime eklendi';
+                if (window.lucide) window.lucide.createIcons();
+
+                // Mini toast bildirimi
+                showToast(reelEl, `"${btn.dataset.word}" kelime defterine eklendi! +1 🧿`);
+            }
+        });
+    });
+
+    // ── Quiz tetikleyici ─────────────────────────────────────────────────────
+    const quizBtn = reelEl.querySelector(`#quiz-btn-${reelId}`);
+    if (quizBtn) {
+        quizBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Videoyu duraklat
+            const p = players[reelId];
+            if (p && typeof p.pauseVideo === 'function') p.pauseVideo();
+
+            // Quiz overlay'i reel-item içine ekle
+            showQuiz(reel, reelEl, () => {
+                // Quiz bitti: butonu tamamlandı olarak güncelle
+                quizBtn.outerHTML = `
+                    <div class="quiz-done-badge">
+                        <i data-lucide="check-circle-2"></i>
+                        <span>Quiz Tamamlandı</span>
+                    </div>
+                `;
+                if (window.lucide) window.lucide.createIcons();
+                // Videoyu devam ettir
+                if (p && typeof p.playVideo === 'function') p.playVideo();
+            });
+        });
+    }
+}
+
+// ─── Toast bildirimi ──────────────────────────────────────────────────────────
+function showToast(parent, message) {
+    const toast = document.createElement('div');
+    toast.className = 'reel-toast';
+    toast.textContent = message;
+    parent.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 2200);
 }
 
 // ─── YouTube Player ───────────────────────────────────────────────────────────

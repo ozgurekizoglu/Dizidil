@@ -1,4 +1,4 @@
-import { seriesData, state } from '../state.js?v=7';
+import { seriesData, state } from '../state.js?v=14';
 
 export function setupHome(container, navigateTo) {
     const homeTemplate = `

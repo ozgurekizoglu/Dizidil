@@ -6,6 +6,15 @@ export const state = {
     unlockedSeries: new Set(),
     listeners: [],
 
+    // ── Kelime Defteri (Flashcard) ───────────────────────────────────────────
+    // wordBank: Map<word_string, { word, trMeaning, meaning, reelId, series,
+    //   addedAt, nextReview, interval, easeFactor, correct, wrong }>
+    wordBank: new Map(),
+
+    // ── Quiz ilerleme kaydı ──────────────────────────────────────────────────
+    // quizCompleted: Set<reelId> — quiz tamamlanan reeller
+    quizCompleted: new Set(),
+
     // Simple state subscription
     subscribe(listener) {
         this.listeners.push(listener);
@@ -46,6 +55,72 @@ export const state = {
         this.notify();
     },
 
+    // ── Kelime Defteri metodları ─────────────────────────────────────────────
+    addWord(wordObj) {
+        // wordObj: { word, trMeaning, meaning, reelId, series }
+        const key = wordObj.word.toLowerCase();
+        if (this.wordBank.has(key)) return false; // zaten var
+        this.wordBank.set(key, {
+            ...wordObj,
+            addedAt: Date.now(),
+            nextReview: Date.now(),        // hemen tekrar edilebilir
+            interval: 1,                   // gün (SM-2 başlangıç)
+            easeFactor: 2.5,               // SM-2 kolaylık faktörü
+            correct: 0,
+            wrong: 0
+        });
+        this.addNazar(1);                  // kelime eklemek ödüllü
+        this.notify();
+        return true;
+    },
+
+    removeWord(word) {
+        this.wordBank.delete(word.toLowerCase());
+        this.notify();
+    },
+
+    // SM-2 algoritması ile bir kelimeyi güncelle
+    // quality: 0-2 = yanlış, 3-5 = doğru (5 = çok kolay)
+    reviewWord(word, quality) {
+        const key = word.toLowerCase();
+        const entry = this.wordBank.get(key);
+        if (!entry) return;
+
+        if (quality >= 3) {
+            // Doğru
+            entry.correct++;
+            if (entry.interval === 1) entry.interval = 1;
+            else if (entry.interval === 2) entry.interval = 6; // düzeltildi: 1→6 gün
+            else entry.interval = Math.round(entry.interval * entry.easeFactor);
+            entry.easeFactor = Math.max(1.3,
+                entry.easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)
+            );
+        } else {
+            // Yanlış — sıfırla
+            entry.wrong++;
+            entry.interval = 1;
+        }
+
+        entry.nextReview = Date.now() + entry.interval * 24 * 60 * 60 * 1000;
+        this.wordBank.set(key, entry);
+        this.notify();
+    },
+
+    // Bugün tekrar edilmesi gereken kelimeler
+    getDueWords() {
+        const now = Date.now();
+        return [...this.wordBank.values()]
+            .filter(w => w.nextReview <= now)
+            .sort((a, b) => a.nextReview - b.nextReview);
+    },
+
+    // Quiz tamamlandı olarak işaretle
+    markQuizCompleted(reelId) {
+        this.quizCompleted.add(reelId);
+        this.addNazar(5); // quiz ödülü
+        this.notify();
+    },
+
     unlockSeries(seriesId, cost) {
         if (this.nazarCount >= cost && !this.unlockedSeries.has(seriesId)) {
             this.nazarCount -= cost;
@@ -62,10 +137,15 @@ export const state = {
             localStorage.setItem('dizidil_nazar', this.nazarCount);
             localStorage.setItem('dizidil_saved', JSON.stringify([...this.savedReels]));
             localStorage.setItem('dizidil_unlocked', JSON.stringify([...this.unlockedSeries]));
+            // wordBank: Map → Array of entries
+            localStorage.setItem('dizidil_wordbank', JSON.stringify([...this.wordBank.entries()]));
+            localStorage.setItem('dizidil_quiz', JSON.stringify([...this.quizCompleted]));
         } else {
             localStorage.removeItem('dizidil_nazar');
             localStorage.removeItem('dizidil_saved');
             localStorage.removeItem('dizidil_unlocked');
+            localStorage.removeItem('dizidil_wordbank');
+            localStorage.removeItem('dizidil_quiz');
         }
     },
 
@@ -76,21 +156,22 @@ export const state = {
             const savedNazar = localStorage.getItem('dizidil_nazar');
             if (savedNazar) {
                 this.nazarCount = parseInt(savedNazar, 10);
-                // Fix: if user has exactly 15 and no unlocked series, upgrade them to 28
                 if (this.nazarCount === 15 && !localStorage.getItem('dizidil_unlocked')) {
                     this.nazarCount = 28;
                 }
             }
 
             const savedReelsStr = localStorage.getItem('dizidil_saved');
-            if (savedReelsStr) {
-                this.savedReels = new Set(JSON.parse(savedReelsStr));
-            }
+            if (savedReelsStr) this.savedReels = new Set(JSON.parse(savedReelsStr));
 
             const unlockedStr = localStorage.getItem('dizidil_unlocked');
-            if (unlockedStr) {
-                this.unlockedSeries = new Set(JSON.parse(unlockedStr));
-            }
+            if (unlockedStr) this.unlockedSeries = new Set(JSON.parse(unlockedStr));
+
+            const wordBankStr = localStorage.getItem('dizidil_wordbank');
+            if (wordBankStr) this.wordBank = new Map(JSON.parse(wordBankStr));
+
+            const quizStr = localStorage.getItem('dizidil_quiz');
+            if (quizStr) this.quizCompleted = new Set(JSON.parse(quizStr));
         }
     }
 };

@@ -1159,3 +1159,593 @@ body {
     height: 100%;
     object-fit: cover;
 }
+
+/* =============================================
+   VOCAB "+" BUTONU — Reel içi kelime ekleme
+   ============================================= */
+
+.vocab-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 8px 10px;
+    min-width: 140px;
+    flex-shrink: 0;
+}
+
+.vocab-chip-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.vocab-chip-word {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vocab-chip-meaning {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vocab-add-btn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.vocab-add-btn:active { transform: scale(0.88); }
+.vocab-add-btn.added {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+/* =============================================
+   QUIZ BUTONU & TAMAMLANDI BADGE
+   ============================================= */
+
+.quiz-trigger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    margin-top: 4px;
+}
+.quiz-trigger-btn:active { transform: scale(0.97); }
+
+.quiz-reward-badge {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.quiz-done-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    color: #4cd137;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px;
+    background: rgba(76, 209, 55, 0.1);
+    border-radius: 10px;
+    margin-top: 4px;
+}
+
+/* =============================================
+   QUIZ OVERLAY
+   ============================================= */
+
+.quiz-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 500;
+    background: rgba(8, 10, 15, 0.97);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: quizFadeIn 0.25s ease;
+}
+.quiz-overlay.quiz-exit { animation: quizFadeIn 0.25s ease reverse; }
+
+@keyframes quizFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.quiz-card {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Progres barı */
+.quiz-progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.quiz-progress-fill {
+    height: 100%;
+    background: var(--accent-blue);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+.quiz-step-label { font-size: 0.78rem; color: var(--text-secondary); }
+.quiz-skip-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.quiz-body { text-align: center; }
+.quiz-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+.quiz-question {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #fff;
+}
+.quiz-hint {
+    font-size: 0.82rem;
+    color: var(--accent-blue);
+    font-style: italic;
+    margin-top: 6px;
+}
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quiz-option {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.quiz-option:active { background: rgba(255,255,255,0.14); }
+.quiz-option.correct {
+    background: rgba(76, 209, 55, 0.18);
+    border-color: #4cd137;
+    color: #4cd137;
+}
+.quiz-option.wrong {
+    background: rgba(255, 71, 87, 0.18);
+    border-color: #ff4757;
+    color: #ff4757;
+}
+.quiz-option:disabled { cursor: default; }
+
+.quiz-feedback {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 12px 14px;
+    animation: quizFadeIn 0.2s ease;
+}
+.feedback-icon { font-size: 1.2rem; flex-shrink: 0; }
+.feedback-text {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.feedback-text small { color: var(--text-secondary); font-style: italic; }
+
+/* Tamamlama ekranı */
+.quiz-complete-card { text-align: center; align-items: center; }
+.quiz-complete-emoji { font-size: 4rem; }
+.quiz-complete-title { font-size: 1.6rem; font-weight: 800; color: #fff; }
+.quiz-complete-subtitle { color: var(--text-secondary); font-size: 0.9rem; }
+.quiz-reward {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    border-radius: 12px;
+    padding: 12px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.nazar-badge { font-size: 1.4rem; font-weight: 800; color: #fff; }
+.quiz-reward-label { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+
+.quiz-continue-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: var(--accent-blue);
+    border: none;
+    border-radius: 24px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+.quiz-continue-btn:active { transform: scale(0.96); }
+
+/* =============================================
+   TOAST BİLDİRİMİ
+   ============================================= */
+
+.reel-toast {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(30, 35, 45, 0.95);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 0.82rem;
+    padding: 9px 16px;
+    border-radius: 20px;
+    white-space: nowrap;
+    z-index: 400;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+}
+.reel-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* =============================================
+   FLASHCARD EKRANI
+   ============================================= */
+
+.flashcard-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #0d0f14;
+}
+
+.flashcard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px 10px;
+    flex-shrink: 0;
+}
+
+.back-btn-fc {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.fc-header-info h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 2px; }
+.fc-stats { font-size: 0.75rem; color: var(--text-secondary); }
+
+.fc-tab-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 18px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+}
+
+.fc-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.fc-tab.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #fff;
+}
+
+#fc-tab-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px;
+}
+
+/* Boş durum */
+.fc-empty {
+    text-align: center;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+.fc-empty-emoji { font-size: 3rem; }
+.fc-empty h3 { font-size: 1.1rem; font-weight: 700; }
+.fc-empty p { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; }
+.fc-streak-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent-blue);
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+/* Tekrar modu */
+.fc-review-wrap { display: flex; flex-direction: column; gap: 16px; }
+.fc-progress-row { display: flex; align-items: center; gap: 10px; }
+.fc-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+.fc-progress-fill {
+    height: 100%;
+    background: var(--accent-blue);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+.fc-progress-label { font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap; }
+
+/* Kartın 3D dönerken kullanacağı scene */
+.fc-card-scene {
+    perspective: 900px;
+    cursor: pointer;
+}
+
+.fc-card {
+    width: 100%;
+    height: 220px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 16px;
+}
+.fc-card.flipped { transform: rotateY(180deg); }
+
+.fc-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
+.fc-front {
+    background: linear-gradient(135deg, #1a1f2e, #252a3d);
+    border: 1.5px solid rgba(255,255,255,0.1);
+}
+.fc-back {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    border: 1.5px solid var(--accent-blue);
+    transform: rotateY(180deg);
+}
+
+.fc-face-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    align-self: flex-start;
+}
+.fc-word-tr { font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1.3; }
+.fc-word-en { font-size: 1.4rem; font-weight: 800; color: var(--accent-blue); line-height: 1.3; }
+.fc-word-tr-hint { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.fc-word-original { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.fc-word-source { font-size: 0.75rem; color: var(--text-secondary); }
+
+.fc-flip-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    border-radius: 20px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    margin-top: 6px;
+}
+
+/* Derecelendirme satırı */
+.fc-rating-row {
+    gap: 12px;
+    animation: quizFadeIn 0.2s ease;
+}
+.fc-rating-label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; }
+.fc-rating-btns { display: flex; gap: 12px; }
+.fc-rate-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    text-align: center;
+}
+.fc-rate-btn:active { transform: scale(0.94); }
+.fc-rate-hard  { border-color: rgba(255,71,87,0.4);  }
+.fc-rate-medium{ border-color: rgba(255,184,0,0.4);  }
+.fc-rate-easy  { border-color: rgba(76,209,55,0.4);  }
+
+/* Tamamlama */
+.fc-review-done {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 14px;
+    padding: 20px 0;
+}
+.fc-done-emoji { font-size: 3.5rem; }
+.fc-done-reward {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+}
+.fc-done-btn {
+    padding: 12px 28px;
+    background: var(--accent-blue);
+    border: none;
+    border-radius: 24px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+}
+
+/* Gözat listesi */
+.fc-browse-list { display: flex; flex-direction: column; gap: 8px; }
+.fc-browse-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+.fc-browse-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fc-browse-word { font-size: 0.9rem; font-weight: 700; color: #fff; }
+.fc-browse-meaning { font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fc-browse-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+.fc-browse-series { font-size: 0.7rem; color: var(--text-secondary); }
+.fc-browse-next { font-size: 0.7rem; color: var(--text-secondary); }
+.fc-browse-next.due { color: #ffa502; font-weight: 600; }
+.fc-remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+}
+
+/* =============================================
+   PROFİL: Kelime Defteri Kısayol Kartı
+   ============================================= */
+
+.wordbank-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(91,33,182,0.2));
+    border: 1.5px solid rgba(124,58,237,0.4);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: transform 0.15s;
+}
+.wordbank-card:active { transform: scale(0.98); }
+.wordbank-card-left { display: flex; align-items: center; gap: 12px; }
+.wordbank-icon { font-size: 2rem; }
+.wordbank-title { font-size: 1rem; font-weight: 700; color: #fff; }
+.wordbank-sub { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+.wordbank-card-right { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
+.wordbank-due {
+    background: #ffa502;
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+}

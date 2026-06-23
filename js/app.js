@@ -1,8 +1,8 @@
-import { setupHome } from './pages/home.js?v=13';
-import { setupReels, cleanupPlayers } from './pages/reels.js?v=13';
-import { setupProfile } from './pages/profile.js?v=13';
-import { setupIdioms } from './pages/idioms.js?v=13';
-import { state } from './state.js?v=13';
+import { setupHome } from './pages/home.js?v=14';
+import { setupReels, cleanupPlayers } from './pages/reels.js?v=14';
+import { setupProfile } from './pages/profile.js?v=14';
+import { setupIdioms } from './pages/idioms.js?v=14';
+import { state } from './state.js?v=14';
 
 const screenContainer = document.getElementById('screen-container');
 const bottomNav = document.getElementById('bottom-nav');

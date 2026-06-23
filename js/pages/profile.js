@@ -1,4 +1,5 @@
-import { state, mockReels } from '../state.js?v=7';
+import { state, mockReels } from '../state.js?v=14';
+import { setupFlashcards } from '../flashcard.js';
 
 export const profileTemplate = `
     <div class="screen profile-screen" style="padding: 16px; padding-bottom: 80px; overflow-y: auto;">
@@ -13,6 +14,22 @@ export const profileTemplate = `
                 <p id="nazar-count">0</p>
             </div>
         </div>
+
+        <!-- Kelime Defteri Kısayolu -->
+        <div class="wordbank-card" id="wordbank-card">
+            <div class="wordbank-card-left">
+                <div class="wordbank-icon">🃏</div>
+                <div>
+                    <div class="wordbank-title">Kelime Defterim</div>
+                    <div class="wordbank-sub" id="wordbank-sub">0 kelime</div>
+                </div>
+            </div>
+            <div class="wordbank-card-right">
+                <span class="wordbank-due" id="wordbank-due"></span>
+                <i data-lucide="chevron-right"></i>
+            </div>
+        </div>
+
         <div class="missions-section">
             <h3>Missions</h3>
             <ul class="mission-list" id="mission-list">
@@ -32,22 +49,57 @@ export const profileTemplate = `
 export function setupProfile(container, navigateTo) {
     container.innerHTML = profileTemplate;
     
-    const nazarEl = container.querySelector('#nazar-count');
-    const missionList = container.querySelector('#mission-list');
-    const logoutBtn = container.querySelector('#logout-btn');
+    const nazarEl       = container.querySelector('#nazar-count');
+    const missionList   = container.querySelector('#mission-list');
+    const logoutBtn     = container.querySelector('#logout-btn');
+    const wordbankCard  = container.querySelector('#wordbank-card');
+    const wordbankSub   = container.querySelector('#wordbank-sub');
+    const wordbankDue   = container.querySelector('#wordbank-due');
     
     logoutBtn.addEventListener('click', () => {
         state.logout();
         navigateTo('login');
     });
+
+    // Kelime defteri kartına tıkla → flashcard ekranı
+    wordbankCard.addEventListener('click', () => {
+        const screenEl = container.querySelector('.profile-screen');
+        screenEl.style.display = 'none';
+
+        const fcContainer = document.createElement('div');
+        fcContainer.style.cssText = 'position:absolute;inset:0;z-index:300;background:#0d0f14;';
+        container.appendChild(fcContainer);
+
+        setupFlashcards(fcContainer, () => {
+            fcContainer.remove();
+            screenEl.style.display = '';
+            render();
+        });
+    });
     
     function render() {
         nazarEl.textContent = state.nazarCount;
+
+        // Kelime defteri istatistikleri
+        const wbCount = state.wordBank.size;
+        const dueCount = state.getDueWords().length;
+        wordbankSub.textContent = `${wbCount} kelime öğrenildi`;
+        if (dueCount > 0) {
+            wordbankDue.textContent = `${dueCount} tekrar bekliyor`;
+            wordbankDue.style.display = 'inline';
+        } else {
+            wordbankDue.textContent = '';
+            wordbankDue.style.display = 'none';
+        }
         
         missionList.innerHTML = '';
+        const quizDone = state.quizCompleted.size;
         const missions = [
-            { title: 'Save 1 word', reward: 2, completed: state.savedReels.size > 0 },
-            { title: 'Login 5 days in a row', reward: 20, completed: false }
+            { title: 'İlk kelimeni ekle', reward: 2, completed: state.wordBank.size > 0 },
+            { title: '5 kelime öğren', reward: 10, completed: state.wordBank.size >= 5 },
+            { title: 'İlk quiz\'i tamamla', reward: 5, completed: quizDone > 0 },
+            { title: '3 klip için quiz yap', reward: 15, completed: quizDone >= 3 },
+            { title: '5 gün üst üste giriş', reward: 20, completed: false }
         ];
 
         missions.forEach(m => {
@@ -89,14 +141,9 @@ export function setupProfile(container, navigateTo) {
         if(window.lucide) window.lucide.createIcons();
     }
     
-    // Initial render
     render();
     
-    // Listen to state changes
     state.subscribe(() => {
-        // Only re-render if the container is still in the DOM
-        if (document.body.contains(nazarEl)) {
-            render();
-        }
+        if (document.body.contains(nazarEl)) render();
     });
 }
