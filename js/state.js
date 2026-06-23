@@ -1,5 +1,5 @@
 export const state = {
-    isAuthenticated: false,
+    isAuthenticated: true,
     currentScreen: 'home',
     nazarCount: 28,
     savedReels: new Set(),

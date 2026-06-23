@@ -2,7 +2,6 @@ import { setupHome } from './pages/home.js?v=13';
 import { setupReels, cleanupPlayers } from './pages/reels.js?v=13';
 import { setupProfile } from './pages/profile.js?v=13';
 import { setupIdioms } from './pages/idioms.js?v=13';
-import { setupLogin } from './pages/login.js?v=13';
 import { state } from './state.js?v=13';
 
 const screenContainer = document.getElementById('screen-container');
@@ -17,11 +16,7 @@ function initApp() {
         console.warn("Lucide not loaded yet");
     }
     
-    if (!state.isAuthenticated) {
-        navigateTo('login');
-    } else {
-        navigateTo('home');
-    }
+    navigateTo('home');
 
     // Nav Listeners
     navButtons.forEach(btn => {
@@ -35,10 +30,7 @@ function initApp() {
 function navigateTo(screenId, data = null) {
     console.log("Navigating to:", screenId);
     
-    // Auth Guard
-    if (screenId !== 'login' && !state.isAuthenticated) {
-        screenId = 'login';
-    }
+    // Auth Guard removed
 
     if (state.currentScreen === 'reels' && screenId !== 'reels') {
         cleanupPlayers();
@@ -56,7 +48,7 @@ function navigateTo(screenId, data = null) {
     });
 
     // Hide/Show bottom nav based on screen
-    if(screenId === 'reels' || screenId === 'login') {
+    if(screenId === 'reels') {
         bottomNav.style.display = 'none';
     } else {
         bottomNav.style.display = 'flex';
@@ -66,9 +58,7 @@ function navigateTo(screenId, data = null) {
     screenContainer.innerHTML = ''; // Clear current
     
     try {
-        if (screenId === 'login') {
-            setupLogin(screenContainer, navigateTo);
-        } else if (screenId === 'home') {
+        if (screenId === 'home') {
             setupHome(screenContainer, navigateTo);
         } else if (screenId === 'reels') {
             setupReels(screenContainer, navigateTo, data);
